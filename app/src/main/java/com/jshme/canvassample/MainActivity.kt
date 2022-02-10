@@ -4,6 +4,9 @@ import android.graphics.Paint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -29,8 +32,98 @@ class MainActivity : ComponentActivity() {
                     Column {
                         BanksaladLogo()
                         KakaoTalkLogo()
+                        SemiRoundSeekBar()
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun SemiRoundSeekBar() {
+    val animatedValue = remember { Animatable(0f) }
+    val textState = remember { mutableStateOf(0) }
+
+    LaunchedEffect(animatedValue) {
+        animatedValue.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(durationMillis = 1000, easing = LinearEasing))
+    }
+
+    val scoreTextPaint = Paint().apply {
+        textAlign = Paint.Align.CENTER
+        textSize = 100f
+        color = Color.Gray.toArgb()
+    }
+
+    Column {
+        Box(
+            modifier = Modifier.size(400.dp, 200.dp)
+        ) {
+            Canvas(modifier = Modifier
+                .size(400.dp)
+                .padding(16.dp)
+            ) {
+                drawArc(
+                    color = Color.LightGray,
+                    startAngle = 180f,
+                    sweepAngle = 180f,
+                    useCenter = false,
+                    topLeft = Offset(30f, 10f),
+                    size = Size(900.dp.value, 900.dp.value),
+                    style = Stroke(width = 40f, cap = StrokeCap.Round)
+                )
+
+                drawArc(
+                    color = Color.Green,
+                    startAngle = 180f,
+                    sweepAngle = textState.value * animatedValue.value,
+                    useCenter = false,
+                    topLeft = Offset(30f, 10f),
+                    size = Size(900.dp.value, 900.dp.value),
+                    style = Stroke(width = 40f, cap = StrokeCap.Round)
+                )
+
+                drawContext.canvas.nativeCanvas.drawText(textState.value.toString(), center.x, 200f, scoreTextPaint)
+            }
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            OutlinedButton(
+                onClick = {
+                    textState.value = 30
+                }) {
+                Text(
+                    text = "30"
+                )
+            }
+            OutlinedButton(
+                onClick = {
+                    textState.value = 60
+                }) {
+                Text(
+                    text = "60"
+                )
+            }
+            OutlinedButton(
+                onClick = {
+                    textState.value = 120
+                }) {
+                Text(
+                    text = "120"
+                )
+            }
+            OutlinedButton(
+                onClick = {
+                    textState.value = 180
+                }) {
+                Text(
+                    text = "180"
+                )
             }
         }
     }
